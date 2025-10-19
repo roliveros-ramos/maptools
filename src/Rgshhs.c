@@ -75,10 +75,10 @@ int getNpols(FILE *);
 
 int gshhs_pipbb(double pt1, double pt2, double *bbs);
 
-int gshhs_between(double x, double low, double up); 
+int gshhs_between(double x, double low, double up);
 
 
-SEXP Rgshhs(SEXP fn, SEXP mode, SEXP dolim, SEXP lim, SEXP level, SEXP minarea) 
+SEXP Rgshhs(SEXP fn, SEXP mode, SEXP dolim, SEXP lim, SEXP level, SEXP minarea)
 {
 	FILE *fp;
 	double w, e, s, n, area, lon, lat, scale = 10.0;
@@ -98,7 +98,7 @@ SEXP Rgshhs(SEXP fn, SEXP mode, SEXP dolim, SEXP lim, SEXP level, SEXP minarea)
 	fp = fopen (CHAR(STRING_ELT(fn, 0)), "rb");
 	if (fp == NULL ) {
 		snprintf(msg, sizeof(msg), "Could not find file %s", CHAR(STRING_ELT(fn, 0)));
-		error(msg);
+		error("%s",msg);
 
 	}
 
@@ -155,7 +155,7 @@ SEXP Rgshhs(SEXP fn, SEXP mode, SEXP dolim, SEXP lim, SEXP level, SEXP minarea)
 		n_read = (int) fread ((void *)&h, (size_t)sizeof (struct GSHHS), 		    (size_t)1, fp);
 /*		version = (h.flag >> 8) & 255;
 		flip = (version != GSHHS_DATA_VERSION);	 Take as sign that byte-swabbing is needed */
-/*		flip = (! (h.level > 0 && h.level < 5));	
+/*		flip = (! (h.level > 0 && h.level < 5));
  Take as sign that byte-swabbing is needed */
 		i = 0;
 		while (n_read == 1) {
@@ -177,12 +177,12 @@ SEXP Rgshhs(SEXP fn, SEXP mode, SEXP dolim, SEXP lim, SEXP level, SEXP minarea)
 /*		    }*/
 		    Level = h.flag & 255;
 		    version = (h.flag >> 8) & 255;
-		    if (!(version >= 9)) 
+		    if (!(version >= 9))
 			warning("Data not same version as software %d", version);
 		    greenwich = (h.flag >> 16) & 3;			/* Greenwich is 0-3 */
 		    src = (h.flag >> 24) & 1;			/* Greenwich is 0 (WDBII) or 1 (WVS) */
 /*		    river = (h.flag >> 25) & 1;			 River is 0 (not river) or 1 (is river) */
-		    w = h.west  * GSHHS_SCL;	
+		    w = h.west  * GSHHS_SCL;
 /* Convert from microdegrees to degrees */
 		    e = h.east  * GSHHS_SCL;
 		    s = h.south * GSHHS_SCL;
@@ -194,11 +194,11 @@ SEXP Rgshhs(SEXP fn, SEXP mode, SEXP dolim, SEXP lim, SEXP level, SEXP minarea)
 		    area = h.area / scale;				/* Now im km^2 */
 		    INTEGER_POINTER(VECTOR_ELT(res, 0))[i] = (signed int) h.id;
 		    INTEGER_POINTER(VECTOR_ELT(res, 1))[i] = (signed int) h.n;
-		    INTEGER_POINTER(VECTOR_ELT(res, 2))[i] = 
+		    INTEGER_POINTER(VECTOR_ELT(res, 2))[i] =
 			(signed int) Level;
-		    INTEGER_POINTER(VECTOR_ELT(res, 3))[i] = 
+		    INTEGER_POINTER(VECTOR_ELT(res, 3))[i] =
 			(signed int) src;
-		    INTEGER_POINTER(VECTOR_ELT(res, 4))[i] = 
+		    INTEGER_POINTER(VECTOR_ELT(res, 4))[i] =
 			(signed int) greenwich;
 		    INTEGER_POINTER(VECTOR_ELT(res, 5))[i] = (signed int) fpos;
 		    NUMERIC_POINTER(VECTOR_ELT(res, 6))[i] = area;
@@ -228,11 +228,11 @@ SEXP Rgshhs(SEXP fn, SEXP mode, SEXP dolim, SEXP lim, SEXP level, SEXP minarea)
 		    PROTECT(subset = NEW_INTEGER(npols)); pc++;
 		    for (i=0; i<npols; i++) {
 			INTEGER_POINTER(subset)[i] = 1;
-			if (INTEGER_POINTER(VECTOR_ELT(res, 2))[i] > 
-			    INTEGER_POINTER(level)[0]) 
+			if (INTEGER_POINTER(VECTOR_ELT(res, 2))[i] >
+			    INTEGER_POINTER(level)[0])
 			    INTEGER_POINTER(subset)[i] = 0;
-			if (NUMERIC_POINTER(VECTOR_ELT(res, 6))[i] < 
-			    NUMERIC_POINTER(minarea)[0]) 
+			if (NUMERIC_POINTER(VECTOR_ELT(res, 6))[i] <
+			    NUMERIC_POINTER(minarea)[0])
 			    INTEGER_POINTER(subset)[i] = 0;
 		    }
 
@@ -277,11 +277,11 @@ SEXP Rgshhs(SEXP fn, SEXP mode, SEXP dolim, SEXP lim, SEXP level, SEXP minarea)
 			PROTECT(clip = NEW_INTEGER(ipols)); pc++;
 			for (i=0, j=0; i<npols; i++) {
 			    if (INTEGER_POINTER(VECTOR_ELT(choice, 0))[i] != 0
-				|| INTEGER_POINTER(VECTOR_ELT(choice, 1))[i] 
+				|| INTEGER_POINTER(VECTOR_ELT(choice, 1))[i]
 				!= 0) {
 				INTEGER_POINTER(chosen)[j] = i;
 				INTEGER_POINTER(clip)[j] = 0;
-				if (INTEGER_POINTER(VECTOR_ELT(choice, 1))[i] 
+				if (INTEGER_POINTER(VECTOR_ELT(choice, 1))[i]
 				    != 4) INTEGER_POINTER(clip)[j] = 1;
 				j++;
 			    }
@@ -331,21 +331,21 @@ SEXP Rgshhs(SEXP fn, SEXP mode, SEXP dolim, SEXP lim, SEXP level, SEXP minarea)
 			fseek (fp, (long)((int) sizeof(struct GSHHS) + j2), SEEK_SET);
 			SET_VECTOR_ELT(plist, i, allocMatrix(REALSXP, j1, 2));
 			for (k = 0; k < j1; k++) {
-			    if (fread ((void *)&p, 
-				(size_t) sizeof(struct POINT), 
+			    if (fread ((void *)&p,
+				(size_t) sizeof(struct POINT),
 				(size_t) 1, fp) != 1) {
 					snprintf (msg, sizeof(msg),
-			"Error reading file %s for %s %d, point %d.\n", 
-			CHAR(STRING_ELT(fn, 0)), name[line], 
+			"Error reading file %s for %s %d, point %d.\n",
+			CHAR(STRING_ELT(fn, 0)), name[line],
 			INTEGER_POINTER(VECTOR_ELT(res, 0))[j], k);
-					error(msg);
+					error("%s",msg);
 			    }
 /*			    if (flip) {*/
 				swapb (&p.x, sizeof(int));
 				swapb (&p.y, sizeof(int));
 /*			    }*/
-			    lon = (INTEGER_POINTER(VECTOR_ELT(res, 4))[j] 
-			    	&& p.x > max_east) ? 
+			    lon = (INTEGER_POINTER(VECTOR_ELT(res, 4))[j]
+			    	&& p.x > max_east) ?
 				p.x * GSHHS_SCL - 360.0 : p.x * GSHHS_SCL;
 			    lat = p.y * GSHHS_SCL;
 			    NUMERIC_POINTER(VECTOR_ELT(plist, i))[k] =  lon;
@@ -367,20 +367,20 @@ int getNpols(FILE *fp) {
 	int n_read/*, flip, version*/;
 	int n;
 
-	n_read = (int) fread ((void *)&h, (size_t)sizeof (struct GSHHS), 
+	n_read = (int) fread ((void *)&h, (size_t)sizeof (struct GSHHS),
 		(size_t)1, fp);
 /*	version = (h.flag >> 8) & 255;
 	flip = (version != GSHHS_DATA_VERSION);	 Take as sign that byte-swabbing is needed */
-/*	flip = (! (h.level > 0 && h.level < 5));	
+/*	flip = (! (h.level > 0 && h.level < 5));
  Take as sign that byte-swabbing is needed */
-	
+
 	n=0;
 	while (n_read == 1) {
 /*		if (flip) {*/
 			swapb (&h.n, sizeof(int));
 /*		}*/
 		fseek (fp, (long)(h.n * (int) sizeof(struct POINT)), SEEK_CUR);
-		n_read = (int) fread((void *)&h, (size_t)sizeof (struct GSHHS), 
+		n_read = (int) fread((void *)&h, (size_t)sizeof (struct GSHHS),
 			(size_t)1, fp);
 		n++;
 	}
@@ -394,8 +394,8 @@ int gshhs_between(double x, double low, double up) {
 }
 
 int gshhs_pipbb(double pt1, double pt2, double *bbs) {
-	if ((gshhs_between(pt1, bbs[0], bbs[1]) == 1) && 
+	if ((gshhs_between(pt1, bbs[0], bbs[1]) == 1) &&
 		(gshhs_between(pt2, bbs[2], bbs[3]) == 1)) return(1);
 	else return(0);
-} 
+}
 
